@@ -66,7 +66,10 @@
 // }
 
 
+
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Post = {
   userId: number;
@@ -75,9 +78,18 @@ type Post = {
   body: string;
 };
 
-export default async function Blog() {
-  const res = await fetch('http://localhost:3000/api/blog', { cache: 'no-store' });
-  const posts: Post[] = await res.json();
+
+import { useEffect, useState } from "react";
+
+export default function Blog() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetch('http://localhost:3000/api/blog')
+      .then(res => res.json())
+      .then(data => setPosts(data));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
@@ -100,8 +112,13 @@ export default async function Blog() {
             {posts.slice(0, 6).map((post, idx) => (
               <div
                 key={post.id}
-                className={`relative bg-white/95 rounded-2xl shadow-2xl border-2 border-red-400 p-6 flex flex-col items-center transition-transform duration-300 hover:scale-105 hover:shadow-red-700/40 ${idx % 2 === 0 ? 'rotate-1' : '-rotate-2'}`}
+                className={`relative bg-white/95 rounded-2xl shadow-2xl border-2 border-red-400 p-6 flex flex-col items-center transition-transform duration-300 hover:scale-105 hover:shadow-red-700/40 cursor-pointer ${idx % 2 === 0 ? 'rotate-1' : '-rotate-2'}`}
                 style={{ minHeight: 420 }}
+                onClick={() => router.push(`/blog/${post.id}`)}
+                tabIndex={0}
+                role="button"
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') router.push(`/blog/${post.id}`); }}
+                aria-label={`Read blog post: ${post.title}`}
               >
                 {/* Pin on top */}
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-7 h-7 bg-red-600 rounded-full flex items-center justify-center shadow-lg z-20">
@@ -121,10 +138,7 @@ export default async function Blog() {
                 <p className="text-base leading-relaxed text-gray-700 mb-4 text-center">
                   {post.body}
                 </p>
-                <Link
-                  href={`/blog/${post.id}`}
-                  className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg font-semibold shadow-md hover:from-red-700 hover:to-red-600 transition-all duration-300 mt-auto"
-                >
+                <div className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg font-semibold shadow-md hover:from-red-700 hover:to-red-600 transition-all duration-300 mt-auto">
                   Read More
                   <svg
                     fill="none"
@@ -137,7 +151,7 @@ export default async function Blog() {
                   >
                     <path d="M5 12h14M12 5l7 7-7 7"></path>
                   </svg>
-                </Link>
+                </div>
               </div>
             ))}
           </div>
