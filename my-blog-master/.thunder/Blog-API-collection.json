@@ -1,0 +1,55 @@
+{
+  "_type": "collection",
+  "name": "Blog API - CRUD",
+  "version": "1.0",
+  "requests": [
+    {
+      "_id": "get-all-posts",
+      "name": "GET All Posts",
+      "method": "GET",
+      "url": "http://localhost:3000/api/blog",
+      "headers": [],
+      "body": null
+    },
+    {
+      "_id": "create-post",
+      "name": "POST Create Post",
+      "method": "POST",
+      "url": "http://localhost:3000/api/blog",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mode": "raw",
+        "raw": "{\n  \"title\": \"New Post Title\",\n  \"content\": \"This is the body of the new post.\"\n}"
+      }
+    },
+    {
+      "_id": "update-post",
+      "name": "PUT Update Post",
+      "method": "PUT",
+      "url": "http://localhost:3000/api/blog/{{blogId}}",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mode": "raw",
+        "raw": "{\n  \"title\": \"Updated Title\"\n}"
+      }
+    },
+    {
+      "_id": "delete-post",
+      "name": "DELETE Post",
+      "method": "DELETE",
+      "url": "http://localhost:3000/api/blog/{{blogId}}",
+      "headers": [],
+      "body": null
+    }
+  ],
+  "environment": {
+    "name": "Local",
+    "values": [
+      { "key": "blogId", "value": "1" }
+    ]
+  }
+}

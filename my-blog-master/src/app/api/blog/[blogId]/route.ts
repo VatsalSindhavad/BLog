@@ -1,53 +1,58 @@
-// app/api/blogs/[blogId]/route.ts
-import blogs from '../../data';
+// src/app/api/blog/[blogId]/route.ts
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+// Fix: Import from '../data' (parent directory, no extension)
+// data.ts is two levels up from this file: src/app/api/data.ts
+import { getPostById, updatePost, deletePost, Post } from '../../data'; 
 
+// --- READ by ID (GET) ---
+// Endpoint: GET /api/blog/[blogId]
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { blogId: string } }
 ) {
-  const blogId = params.blogId;
-  const blog = blogs.find(b => b.id === blogId);
+  const { blogId } = params;
+  const post = getPostById(blogId);
 
-  if (!blog) {
-    return NextResponse.json({ message: 'Blog not found' }, { status: 404 });
+  if (!post) {
+    return NextResponse.json({ message: 'Post not found' }, { status: 404 });
   }
 
-  return NextResponse.json(blog);
+  return NextResponse.json(post);
 }
 
+// --- UPDATE (PUT) ---
+// Endpoint: PUT /api/blog/[blogId]
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { blogId: string } }
 ) {
-  const blogId = params.blogId;
-  const blogIndex = blogs.findIndex(b => b.id === blogId);
+  const { blogId } = params;
+  const body = await request.json() as Partial<Post>;
 
-  if (blogIndex === -1) {
-    return NextResponse.json({ message: 'Blog not found' }, { status: 404 });
+  const updatedPost = updatePost(blogId, body); 
+
+  if (!updatedPost) {
+    return NextResponse.json({ message: 'Post not found or update failed' }, { status: 404 });
   }
 
-  const { title, content } = await request.json();
-  const updatedBlog = { ...blogs[blogIndex], title, content };
-  blogs[blogIndex] = updatedBlog;
-
-  return NextResponse.json(updatedBlog);
+  return NextResponse.json(updatedPost);
 }
 
+// --- DELETE (DELETE) ---
+// Endpoint: DELETE /api/blog/[blogId]
 export async function DELETE(
   request: Request,
   { params }: { params: { blogId: string } }
 ) {
-  const blogId = params.blogId;
-  const blogIndex = blogs.findIndex(b => b.id === blogId);
+  const { blogId } = params;
 
-  if (blogIndex === -1) {
-    return NextResponse.json({ message: 'Blog not found' }, { status: 404 });
+  const success = deletePost(blogId); 
+
+  if (!success) {
+    return NextResponse.json({ message: 'Post not found or delete failed' }, { status: 404 });
   }
 
-  // Use splice() to remove the item, which mutates the original array
-  blogs.splice(blogIndex, 1);
-
-  return new NextResponse(null, { status: 204 });
+  // HTTP 204 No Content
+  return new NextResponse(null, { status: 204 }); 
 }
